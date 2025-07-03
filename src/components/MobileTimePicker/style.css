@@ -1,0 +1,223 @@
+/* Mobile Time Picker - iOS-style dropdown */
+
+.mobile-time-picker {
+  position: relative;
+  width: 100%;
+  user-select: none;
+  z-index: 1000003;
+  isolation: isolate;
+}
+
+.mobile-time-picker.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Trigger Button */
+.mobile-time-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(44, 44, 46, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: inherit;
+  min-height: 48px;
+}
+
+.mobile-time-picker-trigger:hover:not(.disabled) {
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(44, 44, 46, 0.9);
+}
+
+.mobile-time-picker-trigger:active {
+  transform: scale(0.98);
+}
+
+.mobile-time-picker.open .mobile-time-picker-trigger {
+  border-color: #007AFF;
+  background: rgba(44, 44, 46, 0.9);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+/* Value Display */
+.mobile-time-picker-value {
+  font-weight: 600;
+  color: #ffffff;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  letter-spacing: 0.025em;
+}
+
+/* Arrow Icon */
+.mobile-time-picker-arrow {
+  color: rgba(255, 255, 255, 0.6);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.mobile-time-picker.open .mobile-time-picker-arrow {
+  transform: rotate(180deg);
+  color: #007AFF;
+}
+
+/* Dropdown */
+.mobile-time-picker-dropdown {
+  background: rgba(28, 28, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  max-height: 200px;
+  overflow: hidden;
+  animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Options Container */
+.mobile-time-picker-options {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-time-picker-options::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual Options */
+.mobile-time-picker-option {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  letter-spacing: 0.025em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-time-picker-option:last-child {
+  border-bottom: none;
+}
+
+.mobile-time-picker-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.mobile-time-picker-option.selected {
+  background: rgba(0, 122, 255, 0.15);
+  color: #007AFF;
+  font-weight: 600;
+}
+
+.mobile-time-picker-option.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Focus States */
+.mobile-time-picker-trigger:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+.mobile-time-picker-option:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: -2px;
+}
+
+/* iOS-style touch feedback */
+.mobile-time-picker-option:active {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.98);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mobile-time-picker-trigger {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+    min-height: 44px;
+  }
+  
+  .mobile-time-picker-dropdown {
+    max-height: 180px;
+  }
+  
+  .mobile-time-picker-options {
+    max-height: 180px;
+  }
+  
+  .mobile-time-picker-option {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-time-picker-trigger {
+    border-width: 0.5px;
+  }
+  
+  .mobile-time-picker-dropdown {
+    border-width: 0.5px;
+  }
+}
+
+/* Dark Mode Optimizations */
+@media (prefers-color-scheme: dark) {
+  .mobile-time-picker-dropdown {
+    background: rgba(28, 28, 30, 0.98);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-time-picker-trigger,
+  .mobile-time-picker-arrow,
+  .mobile-time-picker-option {
+    transition: none;
+  }
+  
+  .mobile-time-picker-dropdown {
+    animation: none;
+  }
+}
+
+/* Smooth scrolling for webkit browsers */
+.mobile-time-picker-options {
+  -webkit-overflow-scrolling: touch;
+} 

@@ -1,0 +1,336 @@
+.notch-timeline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  z-index: 3;
+}
+
+.empty-state svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.empty-state span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.timeline-container {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.timeline-container.empty {
+  filter: blur(1px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.timeline-grid {
+  display: flex;
+  height: 1200px; /* 24 hours * 50px per hour */
+  position: relative;
+}
+
+.time-labels {
+  width: 50px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.time-label {
+  height: 25px; /* 30-minute intervals */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 8px 0 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1a1a1a;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.time-label.half-hour {
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.time-label.current {
+  background: rgba(255, 255, 255, 0.03);
+  border-right-color: rgba(255, 255, 255, 0.15);
+}
+
+.time-label.current .time-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.time-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.current-indicator {
+  position: absolute;
+  right: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.events-column {
+  flex: 1;
+  position: relative;
+  background: #1a1a1a;
+}
+
+.time-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.grid-line {
+  height: 25px; /* 30-minute intervals */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.grid-line.half-hour {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.grid-line.current {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Add a subtle current time line across the timeline */
+.grid-line.current::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.events-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: 0 12px 0 12px;
+  box-sizing: border-box;
+}
+
+.notch-item {
+  position: absolute;
+  border-left: 3px solid;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  user-select: none;
+  outline: none;
+}
+
+.notch-item:hover {
+  opacity: 0.8;
+  transform: translateX(1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 100 !important;
+}
+
+.notch-item:active {
+  transform: translateX(1px) scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.notch-item:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+  z-index: 100 !important;
+}
+
+.notch-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.notch-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.notch-category {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.notch-category svg {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+/* Overflow indicator styles */
+.notch-overflow-indicator {
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  user-select: none;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notch-overflow-indicator:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.notch-overflow-indicator:active {
+  transform: translateX(2px) scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.notch-overflow-indicator:focus-visible {
+  outline: 2px solid #007AFF;
+  outline-offset: 2px;
+}
+
+.overflow-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.overflow-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .time-labels {
+    width: 45px;
+  }
+  
+  .time-label {
+    padding: 0 6px 0 0;
+  }
+  
+  .events-layer {
+    padding: 0 8px 0 8px;
+  }
+  
+  .notch-item {
+    padding: 4px 10px;
+  }
+  
+  .notch-title {
+    font-size: 11px;
+  }
+  
+  .time-text {
+    font-size: 9px;
+  }
+}
+
+/* Custom scrollbar for timeline */
+.timeline-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.timeline-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+} 

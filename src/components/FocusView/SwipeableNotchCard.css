@@ -1,0 +1,214 @@
+/* Swipeable Notch Card Container */
+.swipeable-notch-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: transparent;
+  isolation: isolate;
+}
+
+/* Main swipeable card */
+.swipeable-notch-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  touch-action: pan-y; /* Allow vertical scrolling but handle horizontal swipes */
+  user-select: none;
+  cursor: grab;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.swipeable-notch-card:active {
+  cursor: grabbing;
+}
+
+.swipeable-notch-card.deleting {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.swipeable-notch-card.snap-expanded {
+  box-shadow: 0 0 15px rgba(255, 59, 48, 0.2);
+}
+
+/* Delete action area (revealed on swipe) - entire area is the button */
+.delete-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%; /* Exact same height as card */
+  width: 0px; /* Will be overridden by inline style */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 48, 0.9) 0%,
+    rgba(215, 0, 21, 0.9) 100%
+  );
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 1; /* Always visible when rendered */
+  transform: translateX(0); /* Always in position when rendered */
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 12px; /* Fully rounded on all corners */
+  margin-left: 0.25rem; /* Small gap from card edge */
+  margin-right: 0.25rem; /* Small gap from screen edge */
+  color: #ffffff;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  /* Smooth width transitions between phases */
+  transition: width 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.15s ease,
+              box-shadow 0.1s ease;
+}
+
+.delete-action:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 48, 1) 0%,
+    rgba(215, 0, 21, 1) 100%
+  );
+  transform: scale(1.02);
+}
+
+.delete-action:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.delete-action.snap-expanded {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 48, 1) 0%,
+    rgba(215, 0, 21, 1) 100%
+  );
+  box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+  /* No width transition in snap mode for instant expansion */
+  transition: background 0.1s ease,
+              box-shadow 0.1s ease;
+}
+
+/* Icon styling - directly in delete-action */
+.delete-action svg {
+  transition: opacity 0.1s ease;
+  opacity: 1;
+  color: inherit;
+}
+
+/* Phase-specific styling using class modifiers */
+.delete-action--initial {
+  background: rgba(255, 59, 48, 0.7);
+  /* Fade-in animation for initial cube appearance */
+  animation: deleteButtonFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.delete-action--icon {
+  background: rgba(255, 59, 48, 0.8);
+}
+
+.delete-action--square,
+.delete-action--stable {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 48, 0.9) 0%,
+    rgba(215, 0, 21, 0.9) 100%
+  );
+}
+
+.delete-action--auto-delete {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 59, 48, 1) 0%,
+    rgba(215, 0, 21, 1) 100%
+  );
+  box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+}
+
+/* Fade-in animation for initial cube */
+@keyframes deleteButtonFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Prevent text selection during swipe */
+.swipeable-notch-container * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection when not swiping */
+.swipeable-notch-container:not(.swiping) * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .delete-action {
+    margin-left: 0.2rem;
+    margin-right: 0.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .delete-action {
+    margin-left: 0.15rem;
+    margin-right: 0.15rem;
+  }
+}
+
+/* Smooth performance optimizations */
+.swipeable-notch-card,
+.delete-action {
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Focus styles for accessibility */
+.delete-action:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Animation keyframes */
+@keyframes deleteSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.swipeable-notch-card.deleting {
+  animation: deleteSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Enhanced rounded corners for child elements */
+.swipeable-notch-card > * {
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* Ensure smooth width transitions during drag */
+.delete-action {
+  overflow: hidden;
+  box-sizing: border-box;
+} 

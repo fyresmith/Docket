@@ -1,0 +1,155 @@
+.notch-overflow-modal {
+  max-width: 600px;
+}
+
+.overflow-notches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.overflow-notch-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.overflow-notch-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.overflow-notch-card:active {
+  transform: translateY(-1px);
+  transition: transform 0.1s ease;
+}
+
+.overflow-notch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.overflow-notch-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.overflow-notch-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.overflow-notch-time svg {
+  opacity: 0.8;
+}
+
+.overflow-notch-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.overflow-notch-category,
+.overflow-notch-duration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.overflow-notch-category {
+  color: inherit; /* Will be overridden by inline style */
+}
+
+.overflow-notch-category svg,
+.overflow-notch-duration svg {
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.overflow-notch-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .notch-overflow-modal {
+    max-width: 95vw;
+  }
+  
+  .overflow-notch-card {
+    padding: 14px;
+  }
+  
+  .overflow-notch-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .overflow-notch-time {
+    align-self: flex-end;
+  }
+  
+  .overflow-notch-details {
+    gap: 12px;
+  }
+  
+  .overflow-notch-title {
+    font-size: 15px;
+  }
+  
+  .overflow-notch-time {
+    font-size: 12px;
+  }
+}
+
+/* Custom scrollbar for the notches list */
+.overflow-notches-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-notches-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-notches-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.overflow-notches-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+} 
