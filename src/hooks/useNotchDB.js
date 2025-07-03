@@ -25,7 +25,7 @@ export function useNotchDB() {
         console.log('🚀 Initializing DocketDB...')
         
         const database = await new Promise((resolve, reject) => {
-          const request = indexedDB.open('DocketApp', 7) // Increment to 7 for improved user profile indexes
+          const request = indexedDB.open('DocketApp', 8) // Increment to 8 for new timestamp and status fields
           
           request.onerror = (event) => {
             console.error('❌ Failed to open Docket database:', event.target.error)
@@ -53,10 +53,10 @@ export function useNotchDB() {
               notchStore = transaction.objectStore('notches')
             }
             
-            // Ensure all notch indexes exist
+            // Ensure all notch indexes exist - including new status and timestamp fields
             const notchIndexes = [
-              'date', 'title', 'category', 'categoryName', 'createdAt', 
-              'startTime', 'endTime', 'recurrence'
+              'date', 'title', 'category', 'categoryName', 'createdAt', 'updatedAt',
+              'startTime', 'endTime', 'recurrence', 'status', 'completed_at', 'started_at'
             ];
             
             notchIndexes.forEach(indexName => {
@@ -75,8 +75,8 @@ export function useNotchDB() {
               categoryStore = transaction.objectStore('categories')
             }
             
-            // Ensure all category indexes exist
-            const categoryIndexes = ['name', 'isDefault'];
+            // Ensure all category indexes exist - including updatedAt
+            const categoryIndexes = ['name', 'isDefault', 'createdAt', 'updatedAt'];
             categoryIndexes.forEach(indexName => {
               if (!categoryStore.indexNames.contains(indexName)) {
                 console.log(`📋 Creating category index: ${indexName}`)
@@ -93,8 +93,8 @@ export function useNotchDB() {
               timerStore = transaction.objectStore('timers')
             }
             
-            // Ensure all timer indexes exist
-            const timerIndexes = ['name', 'category', 'notchId', 'isRunning', 'startTime'];
+            // Ensure all timer indexes exist - including updatedAt and status fields
+            const timerIndexes = ['name', 'category', 'notchId', 'isRunning', 'startTime', 'createdAt', 'updatedAt', 'status'];
             timerIndexes.forEach(indexName => {
               if (!timerStore.indexNames.contains(indexName)) {
                 console.log(`📋 Creating timer index: ${indexName}`)
@@ -112,7 +112,7 @@ export function useNotchDB() {
             }
             
             // Ensure all profile indexes exist
-            const profileIndexes = ['firstName', 'lastName', 'workHours', 'createdAt'];
+            const profileIndexes = ['firstName', 'lastName', 'workHours', 'createdAt', 'updatedAt'];
             profileIndexes.forEach(indexName => {
               if (!profileStore.indexNames.contains(indexName)) {
                 console.log(`📋 Creating profile index: ${indexName}`)
@@ -153,6 +153,48 @@ export function useNotchDB() {
     
     initDB()
   }, [])
+
+  // Helper function to get current timestamp
+  const getCurrentTimestamp = () => new Date().toISOString()
+
+  // Helper function to ensure required timestamps exist on any record
+  const ensureTimestamps = (record, isUpdate = false) => {
+    const now = getCurrentTimestamp()
+    
+    return {
+      ...record,
+      createdAt: record.createdAt || now,
+      updatedAt: isUpdate ? now : (record.updatedAt || now)
+    }
+  }
+
+  // Helper function to set notch status based on current time
+  const calculateNotchStatus = (notch) => {
+    // Don't auto-calculate status if it's already been manually set to completed/cancelled
+    if (notch.status === 'completed' || notch.status === 'cancelled') {
+      return notch.status
+    }
+
+    const now = new Date()
+    const notchDate = new Date(notch.date)
+    const [startHour, startMin] = notch.startTime.split(':').map(Number)
+    const [endHour, endMin] = notch.endTime.split(':').map(Number)
+    
+    const startTime = new Date(notchDate)
+    startTime.setHours(startHour, startMin, 0, 0)
+    
+    const endTime = new Date(notchDate)
+    endTime.setHours(endHour, endMin, 0, 0)
+    
+    if (now < startTime) {
+      return 'upcoming'
+    } else if (now >= startTime && now <= endTime) {
+      return 'ongoing'
+    } else {
+      // Past the end time - check if it was completed
+      return notch.completed_at ? 'completed' : 'missed'
+    }
+  }
 
   const loadNotches = async (database) => {
     if (!database) return
@@ -295,7 +337,11 @@ export function useNotchDB() {
         const store = transaction.objectStore('categories')
         
         defaultCategories.forEach(category => {
-          store.add({ ...category, createdAt: new Date().toISOString() })
+          const enrichedCategory = ensureTimestamps({
+            ...category,
+            syncTimestamp: getCurrentTimestamp()
+          }, false)
+          store.add(enrichedCategory)
         })
         
         transaction.oncomplete = () => {
@@ -363,55 +409,68 @@ export function useNotchDB() {
     }
     
     try {
+      // Ensure timestamps and status are set
+      const enrichedNotchData = ensureTimestamps(notchData, false)
+      
+      // Set initial status and sync timestamp
+      enrichedNotchData.status = enrichedNotchData.status || calculateNotchStatus(enrichedNotchData)
+      enrichedNotchData.syncTimestamp = getCurrentTimestamp() // For Google Drive reconciliation
+      
       console.log('📝 STORING NOTCH TO INDEXEDDB:')
       console.log('====================================')
       console.log('Basic Info:', {
-        id: notchData.id,
-        title: notchData.title,
-        date: notchData.date,
-        startTime: notchData.startTime,
-        endTime: notchData.endTime
+        id: enrichedNotchData.id,
+        title: enrichedNotchData.title,
+        date: enrichedNotchData.date,
+        startTime: enrichedNotchData.startTime,
+        endTime: enrichedNotchData.endTime,
+        status: enrichedNotchData.status
       })
       console.log('Category Info:', {
-        category: notchData.category,
-        categoryName: notchData.categoryName,
-        categoryColor: notchData.categoryColor
+        category: enrichedNotchData.category,
+        categoryName: enrichedNotchData.categoryName,
+        categoryColor: enrichedNotchData.categoryColor
+      })
+      console.log('Timestamps:', {
+        createdAt: enrichedNotchData.createdAt,
+        updatedAt: enrichedNotchData.updatedAt,
+        syncTimestamp: enrichedNotchData.syncTimestamp,
+        completed_at: enrichedNotchData.completed_at,
+        started_at: enrichedNotchData.started_at
       })
       console.log('Additional Data:', {
-        notes: notchData.notes,
-        createdAt: notchData.createdAt,
-        updatedAt: notchData.updatedAt
+        notes: enrichedNotchData.notes
       })
-      if (notchData.recurrence) {
+      if (enrichedNotchData.recurrence) {
         console.log('🔄 RECURRENCE DATA:', {
-          type: notchData.recurrence.type,
-          days: notchData.recurrence.days,
-          dayNames: notchData.recurrence.days.map(d => 
+          type: enrichedNotchData.recurrence.type,
+          days: enrichedNotchData.recurrence.days,
+          dayNames: enrichedNotchData.recurrence.days.map(d => 
             ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]
           ),
-          startDate: new Date(notchData.date).toDateString(),
+          startDate: new Date(enrichedNotchData.date).toDateString(),
           note: 'This notch will appear on selected days starting from the date above'
         })
       } else {
-        console.log('📅 NON-RECURRING: One-time event on', new Date(notchData.date).toDateString())
+        console.log('📅 NON-RECURRING: One-time event on', new Date(enrichedNotchData.date).toDateString())
       }
       console.log('====================================')
       
       // Validate required fields
-      if (!notchData.title || !notchData.date || !notchData.startTime || !notchData.endTime) {
-        console.error('❌ Missing required notch fields:', notchData)
+      if (!enrichedNotchData.title || !enrichedNotchData.date || !enrichedNotchData.startTime || !enrichedNotchData.endTime) {
+        console.error('❌ Missing required notch fields:', enrichedNotchData)
         throw new Error('Missing required fields: title, date, startTime, endTime')
       }
 
       // Validate recurrence data if present
-      if (notchData.recurrence) {
-        if (notchData.recurrence.type !== 'weekly') {
+      if (enrichedNotchData.recurrence) {
+        if (enrichedNotchData.recurrence.type !== 'weekly') {
           throw new Error('Only weekly recurrence is currently supported')
         }
-        if (!Array.isArray(notchData.recurrence.days) || notchData.recurrence.days.length === 0) {
+        if (!Array.isArray(enrichedNotchData.recurrence.days) || enrichedNotchData.recurrence.days.length === 0) {
           throw new Error('Recurrence days must be a non-empty array')
         }
-        const invalidDays = notchData.recurrence.days.filter(day => 
+        const invalidDays = enrichedNotchData.recurrence.days.filter(day => 
           typeof day !== 'number' || day < 0 || day > 6
         )
         if (invalidDays.length > 0) {
@@ -421,16 +480,16 @@ export function useNotchDB() {
 
       const transaction = db.transaction(['notches'], 'readwrite')
       const store = transaction.objectStore('notches')
-      const request = store.add(notchData)
+      const request = store.add(enrichedNotchData)
       
       request.onsuccess = () => {
         console.log('✅ Notch saved to IndexedDB successfully!')
-        console.log('📊 Total fields stored:', Object.keys(notchData).length)
-        console.log('🔍 All stored fields:', Object.keys(notchData).join(', '))
+        console.log('📊 Total fields stored:', Object.keys(enrichedNotchData).length)
+        console.log('🔍 All stored fields:', Object.keys(enrichedNotchData).join(', '))
         
         // Add the new notch to local state
         setNotches(prevNotches => {
-          const updatedNotches = [...prevNotches, notchData]
+          const updatedNotches = [...prevNotches, enrichedNotchData]
           console.log('📋 Total notches in memory:', updatedNotches.length)
           return updatedNotches
         })
@@ -450,23 +509,47 @@ export function useNotchDB() {
     if (!db) return
     
     try {
+      // Ensure timestamps are updated and preserve existing status unless explicitly changed
+      const enrichedNotch = ensureTimestamps(notch, true)
+      
+      // Update status based on current time if not manually set to completed/cancelled
+      if (!enrichedNotch.status || (enrichedNotch.status !== 'completed' && enrichedNotch.status !== 'cancelled')) {
+        enrichedNotch.status = calculateNotchStatus(enrichedNotch)
+      }
+      
+      // Update sync timestamp for Google Drive reconciliation
+      enrichedNotch.syncTimestamp = getCurrentTimestamp()
+      
+      console.log('📝 UPDATING NOTCH IN INDEXEDDB:')
+      console.log('====================================')
+      console.log('Notch ID:', enrichedNotch.id)
+      console.log('Status:', enrichedNotch.status)
+      console.log('Timestamps:', {
+        createdAt: enrichedNotch.createdAt,
+        updatedAt: enrichedNotch.updatedAt,
+        syncTimestamp: enrichedNotch.syncTimestamp,
+        completed_at: enrichedNotch.completed_at,
+        started_at: enrichedNotch.started_at
+      })
+      console.log('====================================')
+      
       const transaction = db.transaction(['notches'], 'readwrite')
       const store = transaction.objectStore('notches')
-      const request = store.put(notch)
+      const request = store.put(enrichedNotch)
       
       request.onsuccess = () => {
-        console.log('Notch updated in database:', notch)
+        console.log('✅ Notch updated in database:', enrichedNotch)
         // Update the notch in local state
         setNotches(prevNotches => 
-          prevNotches.map(n => n.id === notch.id ? notch : n)
+          prevNotches.map(n => n.id === enrichedNotch.id ? enrichedNotch : n)
         )
       }
       
       request.onerror = () => {
-        console.error('Error updating notch in database:', request.error)
+        console.error('❌ Error updating notch in database:', request.error)
       }
     } catch (error) {
-      console.error('Error in updateNotch:', error)
+      console.error('❌ Error in updateNotch:', error)
     }
   }
 
@@ -479,18 +562,71 @@ export function useNotchDB() {
       const request = store.delete(id)
       
       request.onsuccess = () => {
-        console.log('Notch deleted from database:', id)
+        console.log('✅ Notch deleted from database:', id)
         // Remove the notch from local state
         setNotches(prevNotches => prevNotches.filter(n => n.id !== id))
       }
       
       request.onerror = () => {
-        console.error('Error deleting notch from database:', request.error)
+        console.error('❌ Error deleting notch from database:', request.error)
       }
     } catch (error) {
-      console.error('Error in deleteNotch:', error)
+      console.error('❌ Error in deleteNotch:', error)
     }
   }
+
+  // ====== NOTCH STATUS MANAGEMENT ======
+  
+  const markNotchCompleted = async (notchId) => {
+    const notch = notches.find(n => n.id === notchId)
+    if (!notch) return false
+    
+    const updatedNotch = {
+      ...notch,
+      status: 'completed',
+      completed_at: getCurrentTimestamp()
+    }
+    
+    await updateNotch(updatedNotch)
+    return true
+  }
+  
+  const markNotchStarted = async (notchId) => {
+    const notch = notches.find(n => n.id === notchId)
+    if (!notch) return false
+    
+    const updatedNotch = {
+      ...notch,
+      status: 'ongoing',
+      started_at: getCurrentTimestamp()
+    }
+    
+    await updateNotch(updatedNotch)
+    return true
+  }
+  
+  const markNotchCancelled = async (notchId) => {
+    const notch = notches.find(n => n.id === notchId)
+    if (!notch) return false
+    
+    const updatedNotch = {
+      ...notch,
+      status: 'cancelled'
+    }
+    
+    await updateNotch(updatedNotch)
+    return true
+  }
+  
+  // Get notches by status
+  const getNotchesByStatus = (status) => {
+    return notches.filter(notch => notch.status === status)
+  }
+  
+  const getCompletedNotches = () => getNotchesByStatus('completed')
+  const getMissedNotches = () => getNotchesByStatus('missed')
+  const getUpcomingNotches = () => getNotchesByStatus('upcoming')
+  const getOngoingNotches = () => getNotchesByStatus('ongoing')
 
   const getNotchesByDate = (date) => {
     const targetDate = new Date(date)
@@ -621,13 +757,13 @@ export function useNotchDB() {
     }
     
     try {
-      const newCategory = {
+      const newCategory = ensureTimestamps({
         id: Date.now().toString(),
         name: categoryData.name,
         color: categoryData.color,
         isDefault: false,
-        createdAt: new Date().toISOString()
-      }
+        syncTimestamp: getCurrentTimestamp() // For Google Drive reconciliation
+      }, false)
 
       return new Promise((resolve, reject) => {
         const transaction = db.transaction(['categories'], 'readwrite')
@@ -669,11 +805,11 @@ export function useNotchDB() {
     }
     
     try {
-      const updatedCategory = {
+      const updatedCategory = ensureTimestamps({
         ...categoryToUpdate,
         ...updates,
-        updatedAt: new Date().toISOString()
-      }
+        syncTimestamp: getCurrentTimestamp() // For Google Drive reconciliation
+      }, true)
 
       const transaction = db.transaction(['categories'], 'readwrite')
       const store = transaction.objectStore('categories')
@@ -738,13 +874,23 @@ export function useNotchDB() {
     }
     
     try {
+      // Ensure timestamps and status are set for timer
+      const enrichedTimerData = ensureTimestamps({
+        ...timerData,
+        status: timerData.status || 'ready', // ready, running, paused, completed
+        syncTimestamp: getCurrentTimestamp() // For Google Drive reconciliation
+      }, false)
+      
+      console.log('📝 STORING TIMER TO INDEXEDDB:')
+      console.log('Timer data:', enrichedTimerData)
+      
       const transaction = db.transaction(['timers'], 'readwrite')
       const store = transaction.objectStore('timers')
-      const request = store.add(timerData)
+      const request = store.add(enrichedTimerData)
       
       request.onsuccess = () => {
         // Add the new timer to local state with the generated ID
-        const newTimer = { ...timerData, id: request.result }
+        const newTimer = { ...enrichedTimerData, id: request.result }
         setTimers(prevTimers => [...prevTimers, newTimer])
         console.log('✅ Timer saved to database:', newTimer)
       }
@@ -763,15 +909,25 @@ export function useNotchDB() {
     if (!db || !isDbReady) return
     
     try {
+      // Ensure timestamps are updated for timer
+      const enrichedTimer = ensureTimestamps({
+        ...timer,
+        syncTimestamp: getCurrentTimestamp() // For Google Drive reconciliation
+      }, true)
+      
+      console.log('📝 UPDATING TIMER IN INDEXEDDB:')
+      console.log('Timer ID:', enrichedTimer.id, 'Status:', enrichedTimer.status)
+      
       const transaction = db.transaction(['timers'], 'readwrite')
       const store = transaction.objectStore('timers')
-      const request = store.put(timer)
+      const request = store.put(enrichedTimer)
       
       request.onsuccess = () => {
         // Update the timer in local state
         setTimers(prevTimers => 
-          prevTimers.map(t => t.id === timer.id ? timer : t)
+          prevTimers.map(t => t.id === enrichedTimer.id ? enrichedTimer : t)
         )
+        console.log('✅ Timer updated in database:', enrichedTimer.id)
       }
       
       request.onerror = () => {
@@ -935,6 +1091,16 @@ export function useNotchDB() {
     getRecurringNotches,
     getNotchesByCategory,
     
+    // Notch Status Management
+    markNotchCompleted,
+    markNotchStarted,
+    markNotchCancelled,
+    getNotchesByStatus,
+    getCompletedNotches,
+    getMissedNotches,
+    getUpcomingNotches,
+    getOngoingNotches,
+    
     // Categories
     categories,
     isCategoriesLoading,
@@ -948,6 +1114,10 @@ export function useNotchDB() {
     timers,
     addTimer,
     updateTimer,
-    deleteTimer
+    deleteTimer,
+    
+    // Utility functions for sync
+    getCurrentTimestamp,
+    calculateNotchStatus
   }
 } 

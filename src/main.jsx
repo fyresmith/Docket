@@ -3,18 +3,11 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
-// PWA registration
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
+// Initialize timer service worker for background timer management
+import { timerServiceWorker } from './services/timerServiceWorker'
+
+// The service worker manager will handle registration and initialization
+console.log('Timer service worker manager initialized:', timerServiceWorker.isSupported())
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

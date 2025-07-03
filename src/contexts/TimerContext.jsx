@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { useNotchDB } from '../hooks/useNotchDB'
 import { useTimerLogic } from '../hooks/useTimerLogic'
+import { useServiceWorkerTimerLogic } from '../hooks/useServiceWorkerTimerLogic'
 
 const TimerContext = createContext()
 
@@ -14,7 +15,17 @@ export const useTimer = () => {
 
 export function TimerProvider({ children }) {
   const { timers, addTimer, updateTimer, deleteTimer, isDbReady } = useNotchDB()
-  const { runningTimers, startTimer, stopTimer, resetTimer } = useTimerLogic(timers, updateTimer)
+  
+  // Use service worker timer logic with fallback to original logic
+  const serviceWorkerTimerLogic = useServiceWorkerTimerLogic(timers, updateTimer)
+  const originalTimerLogic = useTimerLogic(timers, updateTimer)
+  
+  // Choose which timer logic to use based on service worker support
+  const timerLogic = serviceWorkerTimerLogic.isServiceWorkerSupported 
+    ? serviceWorkerTimerLogic 
+    : originalTimerLogic
+  
+  const { runningTimers, startTimer, stopTimer, resetTimer } = timerLogic
   
   // Active timer management (which timer is currently being viewed)
   const [activeTimerId, setActiveTimerId] = useState(null)
@@ -201,7 +212,11 @@ export function TimerProvider({ children }) {
     getRunningTimersInfo,
     
     // Database state
-    isDbReady
+    isDbReady,
+    
+    // Service worker state
+    serviceWorkerReady: serviceWorkerTimerLogic.serviceWorkerReady,
+    isServiceWorkerSupported: serviceWorkerTimerLogic.isServiceWorkerSupported
   }
   
   return (

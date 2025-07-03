@@ -216,6 +216,10 @@ function CreateNotchModal({ isOpen, onClose, onCreateNotch, selectedDate }) {
         type: 'weekly',
         days: recurrenceDays.sort() // Ensure days are sorted
       } : null,
+      // Status and timestamp fields will be set by the database layer
+      status: 'upcoming', // Initial status, will be calculated by DB layer
+      completed_at: null,
+      started_at: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }

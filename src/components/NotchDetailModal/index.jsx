@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { FiClock, FiTag, FiFileText, FiCalendar, FiRepeat, FiEdit3, FiEdit } from 'react-icons/fi'
 import Modal from '../Modal'
 import EditNotchModal from '../EditNotchModal'
+import NotchStatusDemo from '../NotchStatusDemo'
 import './style.css'
 
 function NotchDetailModal({ isOpen, onClose, notch, onUpdateNotch, onDeleteNotch }) {
@@ -300,6 +301,20 @@ function NotchDetailModal({ isOpen, onClose, notch, onUpdateNotch, onDeleteNotch
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Status Management Demo */}
+          <div className="detail-section">
+            <h3 className="section-title">Task Status & Management</h3>
+            <NotchStatusDemo 
+              notch={notch} 
+              onStatusChange={() => {
+                // Force a re-render by calling the update handler with current notch
+                // This will refresh the modal with updated status information
+                const refreshedNotch = { ...notch }
+                onUpdateNotch(refreshedNotch)
+              }}
+            />
           </div>
         </div>
       </Modal>
