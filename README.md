@@ -1,8 +1,8 @@
-# ⏰ Notch
+# ⏰ Docket
 
-**Notch your time. Mark your hours with intention.**
+**Organize your time. Structure your hours with intention.**
 
-Notch is a modern, mobile-first Progressive Web App (PWA) designed for intentional timeboxing and focused productivity. Built with React and powered by offline-first architecture, Notch helps you structure your day with precision and purpose.
+Docket is a modern, mobile-first Progressive Web App (PWA) designed for intentional timeboxing and focused productivity. Built with React and powered by offline-first architecture, Docket helps you structure your day with precision and purpose.
 
 ![Version](https://img.shields.io/badge/version-0.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -12,9 +12,9 @@ Notch is a modern, mobile-first Progressive Web App (PWA) designed for intention
 
 ### 🎯 **Core Functionality**
 - **Daily Timeboxing**: 24-hour vertical timeline with visual time blocks
-- **Smart Scheduling**: Create, edit, and manage time-blocked tasks ("notches")
+- **Smart Scheduling**: Create, edit, and manage time-blocked tasks
 - **Live Timers**: Built-in countdown timers with background persistence
-- **Recurring Events**: Set up daily, weekly, or custom recurring notches
+- **Recurring Events**: Set up daily, weekly, or custom recurring tasks
 - **Category System**: Organize tasks with color-coded categories
 
 ### 📱 **Mobile-First Experience**
@@ -47,8 +47,8 @@ Notch is a modern, mobile-first Progressive Web App (PWA) designed for intention
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/notch.git
-   cd notch
+   git clone https://github.com/yourusername/docket.git
+   cd docket
    ```
 
 2. **Install dependencies**
@@ -62,7 +62,7 @@ Notch is a modern, mobile-first Progressive Web App (PWA) designed for intention
    ```
 
 4. **Open in browser**
-   Navigate to `http://localhost:5173` and start notching your time!
+   Navigate to `http://localhost:5173` and start organizing your time!
 
 ### Production Build
 ```bash
@@ -73,19 +73,19 @@ npm run preview
 ## 📖 How to Use
 
 ### Getting Started
-1. **Create Your First Notch**: Tap the `+` button to schedule your first time block
+1. **Create Your First Task**: Tap the `+` button to schedule your first time block
 2. **Set Duration**: Choose start and end times for focused work sessions
-3. **Add Categories**: Organize your notches with color-coded categories
-4. **Start Timer**: Tap any notch to begin a focused work session
+3. **Add Categories**: Organize your tasks with color-coded categories
+4. **Start Timer**: Tap any task to begin a focused work session
 5. **Track Progress**: Monitor your daily accomplishments
 
 ### Key Concepts
 
-- **Notch**: A scheduled time block for focused work
-- **Notchline**: Your daily timeline view
-- **Live Notch**: An active timer session
-- **Notchloop**: A recurring task or event
-- **Deep Notch**: Extended focus sessions with distraction blocking
+- **Task**: A scheduled time block for focused work
+- **Timeline**: Your daily timeline view
+- **Live Timer**: An active timer session
+- **Recurring Task**: A repeating task or event
+- **Focus Session**: Extended focus sessions with distraction blocking
 
 ### Views & Navigation
 
