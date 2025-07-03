@@ -4,6 +4,12 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/', // For custom domain deployment
+  build: {
+    outDir: 'build',
+    assetsDir: 'assets',
+    sourcemap: false
+  },
   plugins: [
     react(),
     VitePWA({
@@ -48,10 +54,7 @@ export default defineConfig({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}?${Date.now()}`;
+                maxAgeSeconds: 60 * 60 * 24 * 365
               }
             }
           }

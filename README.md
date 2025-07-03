@@ -70,6 +70,32 @@ npm run build
 npm run preview
 ```
 
+## 🚀 Deployment
+
+### GitHub Pages
+This project uses gh-pages for simple deployment to GitHub Pages.
+
+1. **Setup GitHub Pages**:
+   - Go to your repository settings
+   - Navigate to "Pages" section
+   - Set source to "Deploy from a branch"
+   - Select `gh-pages` branch and `/ (root)` folder
+
+2. **Deploy Your Site**:
+   ```bash
+   npm run deploy
+   ```
+   
+   This command will:
+   - Build your project (`npm run build`)
+   - Deploy the `build` folder to the `gh-pages` branch
+   - Your site will be available at `https://docket.calebmsmith.com`
+
+3. **Development Workflow**:
+   - Make your changes
+   - Test locally with `npm run dev`
+   - Deploy with `npm run deploy`
+
 ## 📖 How to Use
 
 ### Getting Started
