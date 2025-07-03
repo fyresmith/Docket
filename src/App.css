@@ -134,11 +134,11 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   /* Add padding to prevent content from being hidden behind fixed header and bottom navigation */
-  padding-top: 164px;
+  padding-top: 60px;
   padding-bottom: 72px;
 }
 
-/* Focus view has less top padding since no day picker */
+/* Focus view and other views use same top padding since calendar view handles its own header */
 .app-content.focus-view {
   padding-top: 60px;
 }
@@ -175,11 +175,11 @@ body {
 @media (max-width: 768px) {
   .app-content {
     /* Adjust padding for mobile header and bottom navigation heights */
-    padding-top: 148px;
+    padding-top: 60px;
     padding-bottom: 68px;
   }
   
-  /* Focus view mobile has less top padding since no day picker */
+  /* Focus view mobile uses same top padding since calendar view handles its own header */
   .app-content.focus-view {
     padding-top: 60px;
   }

@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { FiClock, FiTag, FiFileText, FiPlus, FiCheck, FiX, FiChevronDown, FiCalendar, FiRepeat, FiEdit, FiSave, FiTrash2 } from 'react-icons/fi'
-import Modal from '../common/Modal'
-import MobileTimePicker from '../common/MobileTimePicker'
-import { useNotchDB } from '../../hooks/useNotchDB'
-import '../CreateNotchModal/style.css'
+import { FiClock, FiTag, FiFileText, FiPlus, FiCheck, FiX, FiChevronDown, FiCalendar, FiRepeat, FiEdit } from 'react-icons/fi'
+import Modal from '../Modal'
+import MobileTimePicker from '../MobileTimePicker'
+import { useNotchDB } from '../../../hooks/useNotchDB'
+import './style.css'
 
-function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }) {
+function CreateNotchModal({ isOpen, onClose, onCreateNotch, selectedDate }) {
   const [title, setTitle] = useState('')
-  const [selectedNotchDate, setSelectedNotchDate] = useState(new Date())
-  // Ensure we always have valid number defaults
+  const [selectedNotchDate, setSelectedNotchDate] = useState(selectedDate)
   const [startHour, setStartHour] = useState(12)
   const [startMinute, setStartMinute] = useState(0)
   const [endHour, setEndHour] = useState(13)
@@ -54,69 +53,64 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
     const spaceBelow = viewportHeight - triggerRect.bottom
     const spaceAbove = triggerRect.top
     
-    const estimatedItemHeight = 48
+    // Estimate dropdown content height (categories + divider + add new option)
+    const estimatedItemHeight = 48 // approximate height per option
     const estimatedHeight = Math.min(
-      (categories.length + 2) * estimatedItemHeight + 60,
-      280
+      (categories.length + 2) * estimatedItemHeight + 60, // +2 for "No category" and "Create new", +60 for padding/margins
+      280 // max height
     )
 
     let direction = 'down'
     let maxHeight = 280
 
+    // If not enough space below but enough above, position upward
     if (spaceBelow < estimatedHeight && spaceAbove > estimatedHeight) {
       direction = 'up'
-      maxHeight = Math.min(spaceAbove - 20, 280)
+      maxHeight = Math.min(spaceAbove - 20, 280) // 20px buffer
     } else if (spaceBelow < estimatedHeight) {
-      maxHeight = Math.max(spaceBelow - 20, 200)
+      // Not enough space in either direction, limit height to available space
+      maxHeight = Math.max(spaceBelow - 20, 200) // minimum 200px height
     }
 
     setDropdownPosition({ direction, maxHeight })
   }
 
-  // Pre-fill form fields when modal opens with notch data
+  // Set default times when modal opens
   useEffect(() => {
-    if (isOpen && notch) {
-      // Parse start and end times with fallbacks
-      let startH = 12, startM = 0, endH = 13, endM = 0
+    if (isOpen) {
+      const now = new Date()
+      const currentHour = now.getHours()
+      const currentMinute = now.getMinutes()
       
-      try {
-        if (notch.startTime && typeof notch.startTime === 'string') {
-          const [parsedStartH, parsedStartM] = notch.startTime.split(':').map(Number)
-          if (!isNaN(parsedStartH) && !isNaN(parsedStartM)) {
-            startH = parsedStartH
-            startM = parsedStartM
-          }
-        }
-        
-        if (notch.endTime && typeof notch.endTime === 'string') {
-          const [parsedEndH, parsedEndM] = notch.endTime.split(':').map(Number)
-          if (!isNaN(parsedEndH) && !isNaN(parsedEndM)) {
-            endH = parsedEndH
-            endM = parsedEndM
-          }
-        }
-      } catch (error) {
-        console.warn('Error parsing notch times, using defaults:', error)
-      }
+      // Round current time to nearest 30-minute interval
+      const totalMinutes = currentHour * 60 + currentMinute
+      const roundedMinutes = Math.round(totalMinutes / 30) * 30
+      const roundedHours = Math.floor(roundedMinutes / 60)
+      const finalMinutes = roundedMinutes % 60
       
-      setTitle(notch.title || '')
-      setSelectedNotchDate(notch.date ? new Date(notch.date) : new Date())
-      setStartHour(startH)
-      setStartMinute(startM)
-      setEndHour(endH)
-      setEndMinute(endM)
-      setSelectedCategory(notch.category || '')
-      setNotes(notch.notes || '')
-      setRecurrenceDays(notch.recurrence?.days || [])
+      setStartHour(roundedHours)
+      setStartMinute(finalMinutes)
       
-      // Reset UI state
+      // Set end time to 1 hour later
+      const endTotalMinutes = roundedMinutes + 60
+      const endHours = Math.floor(endTotalMinutes / 60)
+      const endMinutes = endTotalMinutes % 60
+      
+      setEndHour(endHours)
+      setEndMinute(endMinutes)
+      
+      setTitle('')
+      setSelectedNotchDate(selectedDate)
+      setSelectedCategory('')
+      setNotes('')
+      setRecurrenceDays([])
       setShowAddCategory(false)
       setNewCategoryName('')
       setNewCategoryColor('#3B82F6')
       setIsDropdownOpen(false)
       setIsAddingCategory(false)
     }
-  }, [isOpen, notch])
+  }, [isOpen, selectedDate])
 
   // Handle clicking outside dropdown
   useEffect(() => {
@@ -135,8 +129,10 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
   // Calculate dropdown position when opened
   useEffect(() => {
     if (isDropdownOpen) {
+      // Small delay to ensure DOM is updated
       setTimeout(calculateDropdownPosition, 0)
       
+      // Recalculate on window resize
       const handleResize = () => calculateDropdownPosition()
       window.addEventListener('resize', handleResize)
       
@@ -147,6 +143,7 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
   const handleStartHourChange = (hour) => {
     setStartHour(hour)
     
+    // Auto-adjust end time if it's before start time
     const startTotalMinutes = hour * 60 + startMinute
     const endTotalMinutes = endHour * 60 + endMinute
     
@@ -162,6 +159,7 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
   const handleStartMinuteChange = (minute) => {
     setStartMinute(minute)
     
+    // Auto-adjust end time if it's before start time
     const startTotalMinutes = startHour * 60 + minute
     const endTotalMinutes = endHour * 60 + endMinute
     
@@ -190,30 +188,24 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
       return
     }
 
-    // Ensure time values are valid numbers before validation
-    const safeStartHour = typeof startHour === 'number' && !isNaN(startHour) ? startHour : 12
-    const safeStartMinute = typeof startMinute === 'number' && !isNaN(startMinute) ? startMinute : 0
-    const safeEndHour = typeof endHour === 'number' && !isNaN(endHour) ? endHour : 13
-    const safeEndMinute = typeof endMinute === 'number' && !isNaN(endMinute) ? endMinute : 0
-
     // Validate time order
-    const startTotalMinutes = safeStartHour * 60 + safeStartMinute
-    const endTotalMinutes = safeEndHour * 60 + safeEndMinute
+    const startTotalMinutes = startHour * 60 + startMinute
+    const endTotalMinutes = endHour * 60 + endMinute
     
     if (startTotalMinutes >= endTotalMinutes) {
       console.error('End time must be after start time')
       alert('End time must be after start time')
       return
     }
-    
-    const startTime = `${safeStartHour.toString().padStart(2, '0')}:${safeStartMinute.toString().padStart(2, '0')}`
-    const endTime = `${safeEndHour.toString().padStart(2, '0')}:${safeEndMinute.toString().padStart(2, '0')}`
 
-    // Build updated notch object preserving original data
-    const updatedNotch = {
-      ...notch, // Preserve original data including ID and createdAt
+    const startTime = `${startHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`
+    const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`
+
+    // Build comprehensive notch object with all fields
+    const newNotch = {
+      id: Date.now().toString(),
       title: title.trim(),
-      date: selectedNotchDate.toISOString(),
+      date: selectedNotchDate.toISOString(), // This serves as start date for recurring notches
       startTime,
       endTime,
       category: selectedCategory || null,
@@ -222,30 +214,49 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
       notes: notes.trim() || null,
       recurrence: recurrenceDays.length > 0 ? {
         type: 'weekly',
-        days: recurrenceDays.sort()
+        days: recurrenceDays.sort() // Ensure days are sorted
       } : null,
+      // Status and timestamp fields will be set by the database layer
+      status: 'upcoming', // Initial status, will be calculated by DB layer
+      completed_at: null,
+      started_at: null,
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
-    console.log('Updating notch with data:', updatedNotch)
+    console.log('Creating notch with complete data structure:', {
+      ...newNotch,
+      recurrenceInfo: newNotch.recurrence ? {
+        type: newNotch.recurrence.type,
+        daysCount: newNotch.recurrence.days.length,
+        days: newNotch.recurrence.days,
+        startDate: selectedNotchDate.toDateString()
+      } : 'No recurrence'
+    })
 
-    // Validate recurrence days
-    if (updatedNotch.recurrence) {
-      const invalidDays = updatedNotch.recurrence.days.filter(day => day < 0 || day > 6)
+    // Validate that recurrence days are within valid range (0-6)
+    if (newNotch.recurrence) {
+      const invalidDays = newNotch.recurrence.days.filter(day => day < 0 || day > 6)
       if (invalidDays.length > 0) {
         console.error('Invalid recurrence days detected:', invalidDays)
         alert('Invalid recurrence days selected')
         return
       }
+      
+      console.log('Recurrence setup: Starting', selectedNotchDate.toDateString(), 
+                  'recurring on:', newNotch.recurrence.days.map(d => 
+                    ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d]
+                  ).join(', ')
+      )
     }
 
-    // Submit the updated notch
+    // Submit the notch
     try {
-      onUpdateNotch(updatedNotch)
+      onCreateNotch(newNotch)
       onClose()
     } catch (error) {
-      console.error('Error updating notch:', error)
-      alert('Failed to update task. Please try again.')
+      console.error('Error creating notch:', error)
+      alert('Failed to create task. Please try again.')
     }
   }
 
@@ -269,6 +280,7 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
         setShowAddCategory(false)
         setNewCategoryName('')
         setNewCategoryColor('#3B82F6')
+        // Auto-select the newly created category
         setSelectedCategory(newCategory.id)
       }
     } catch (error) {
@@ -292,14 +304,9 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
 
   const selectedCategoryObj = getCategoryById(selectedCategory)
 
-  // Calculate duration with safety checks
-  const safeStartHour = typeof startHour === 'number' && !isNaN(startHour) ? startHour : 12
-  const safeStartMinute = typeof startMinute === 'number' && !isNaN(startMinute) ? startMinute : 0
-  const safeEndHour = typeof endHour === 'number' && !isNaN(endHour) ? endHour : 13
-  const safeEndMinute = typeof endMinute === 'number' && !isNaN(endMinute) ? endMinute : 0
-  
-  const startTotalMinutes = safeStartHour * 60 + safeStartMinute
-  const endTotalMinutes = safeEndHour * 60 + safeEndMinute
+  // Calculate duration
+  const startTotalMinutes = startHour * 60 + startMinute
+  const endTotalMinutes = endHour * 60 + endMinute
   const durationHours = Math.max(0, (endTotalMinutes - startTotalMinutes) / 60)
 
   // Format date for input value (YYYY-MM-DD)
@@ -344,15 +351,8 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
     }
   }
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
-      onDeleteNotch(notch.id)
-      onClose()
-    }
-  }
-
   const footerActions = (
-    <div className="notch-actions three-button-layout">
+    <div className="notch-actions">
       <button 
         type="button" 
         className="notch-btn-secondary" 
@@ -361,33 +361,22 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
         Cancel
       </button>
       <button 
-        type="button" 
-        className="notch-btn-danger" 
-        onClick={handleDelete}
-      >
-        <FiTrash2 size={16} />
-        Delete
-      </button>
-      <button 
         type="submit" 
         form="notch-form"
         className="notch-btn-primary"
         disabled={!title.trim()}
       >
-        <FiSave size={16} />
-        Save
+        Create Task
       </button>
     </div>
   )
-
-  if (!notch) return null
 
   return (
     <Modal 
       isOpen={isOpen} 
       onClose={onClose}
-      title="Edit Task"
-      subtitle="Update your activity details"
+      title="Create Task"
+      subtitle="Schedule your next activity"
       footerActions={footerActions}
     >
       <form id="notch-form" onSubmit={handleSubmit} className="notch-form">
@@ -431,25 +420,18 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
 
         {/* Recurrence Field */}
         <div className="notch-field">
-          <div className="notch-time-header">
-            <span>
-              <FiRepeat size={16} />
-              Repeat
-            </span>
-            {recurrenceDays.length > 0 && (
-              <span className="notch-duration">
-                {recurrenceDays.length} day{recurrenceDays.length !== 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
-          
+          <label className="notch-field-label">
+            <FiRepeat size={16} />
+            Repeats
+          </label>
           <div className="days-selector">
-            {daysOfWeek.map((day) => (
+            {daysOfWeek.map(day => (
               <button
                 key={day.index}
                 type="button"
                 className={`day-button ${recurrenceDays.includes(day.index) ? 'selected' : ''}`}
                 onClick={() => toggleRecurrenceDay(day.index)}
+                title={day.full}
               >
                 {day.short}
               </button>
@@ -457,7 +439,7 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
           </div>
         </div>
 
-        {/* Time Field */}
+        {/* Time Section */}
         <div className="notch-field">
           <div className="notch-time-header">
             <span>
@@ -465,7 +447,7 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
               Time
             </span>
             <span className="notch-duration">
-              {durationHours.toFixed(1)}h
+              {durationHours > 0 ? `${durationHours.toFixed(1)}h` : '1h'}
             </span>
           </div>
           
@@ -705,4 +687,4 @@ function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }
   )
 }
 
-export default EditNotchModal 
+export default CreateNotchModal 

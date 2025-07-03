@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { FiClock, FiTag, FiFileText, FiPlus, FiCheck, FiX, FiChevronDown, FiCalendar, FiRepeat, FiEdit, FiSave, FiTrash2 } from 'react-icons/fi'
-import Modal from '../common/Modal'
-import MobileTimePicker from '../common/MobileTimePicker'
-import { useNotchDB } from '../../hooks/useNotchDB'
+import Modal from '../Modal'
+import MobileTimePicker from '../MobileTimePicker'
+import { useNotchDB } from '../../../hooks/useNotchDB'
 import '../CreateNotchModal/style.css'
 
 function EditNotchModal({ isOpen, onClose, onUpdateNotch, onDeleteNotch, notch }) {

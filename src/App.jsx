@@ -1,20 +1,16 @@
 import { useState, useEffect } from 'react'
-import Header from './components/Header'
-import DayPicker from './components/DayPicker'
-import TaskTimeline from './components/TaskTimeline'
-import EmptyDayState from './components/EmptyDayState'
-import BottomNavigation from './components/BottomNavigation'
-import CreateNotchModal from './components/CreateNotchModal'
-import NotchDetailModal from './components/NotchDetailModal'
-import FocusView from './components/FocusView'
-import TimerView from './components/TimerView'
-import ProfileView from './components/ProfileView'
-import Onboarding from './components/Onboarding'
+import Header from './components/layout/Header'
+import BottomNavigation from './components/layout/BottomNavigation'
+import CreateNotchModal from './components/common/CreateNotchModal'
+import NotchDetailModal from './components/common/NotchDetailModal'
+import DocketView from './components/views/DocketView'
+import CalendarView from './components/views/CalendarView'
+import LibraryView from './components/views/LibraryView'
+import TimerView from './components/views/TimerView'
+import ProfileView from './components/views/ProfileView'
+import Onboarding from './components/views/Onboarding'
 import { useNotchDB } from './hooks/useNotchDB'
 import { TimerProvider } from './contexts/TimerContext'
-// import TimerList from './components/TimerList'
-// import TimerDetail from './components/TimerDetail'
-// import CreateTimerModal from './components/CreateTimerModal'
 import './App.css'
 
 // Theme initialization function
@@ -29,14 +25,15 @@ function AppContent() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedNotch, setSelectedNotch] = useState(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
-  const [currentView, setCurrentView] = useState('timer')
+  const [currentView, setCurrentView] = useState('docket')
   const [selectedTimerNotch, setSelectedTimerNotch] = useState(null)
-  const [previousView, setPreviousView] = useState('timer')
+  const [previousView, setPreviousView] = useState('docket')
   
   // Initialize theme on app load
   useEffect(() => {
     initializeTheme()
   }, [])
+  
   const { 
     notches, 
     isDbReady, 
@@ -48,40 +45,7 @@ function AppContent() {
     updateNotch,
     getNotchesByDate, 
     deleteNotch
-  } = useNotchDB()
-  
-  // const [selectedTimer, setSelectedTimer] = useState(null)
-  // const [searchQuery, setSearchQuery] = useState('')
-
-  // // Update selected timer when timers change
-  // useEffect(() => {
-  //   if (selectedTimer) {
-  //     const updatedTimer = timers.find(t => t.id === selectedTimer.id)
-  //     if (updatedTimer && updatedTimer.timeLeft !== selectedTimer.timeLeft) {
-  //       setSelectedTimer(updatedTimer)
-  //     }
-  //   }
-  // }, [timers, selectedTimer])
-
-  // const handleCreateTimer = (timerData) => {
-  //   addTimer(timerData)
-  //   setShowCreateModal(false)
-  // }
-
-  // const handleTimerSelect = (timer) => {
-  //   setSelectedTimer(timer)
-  // }
-
-  // const handleBackToList = () => {
-  //   setSelectedTimer(null)
-  // }
-
-  // const handleDeleteTimer = (id) => {
-  //   deleteTimer(id)
-  //   if (selectedTimer?.id === id) {
-  //     setSelectedTimer(null)
-  //   }
-  // }
+  } = useNotchDB();
 
   const handleDateChange = (date) => {
     setSelectedDate(date)
@@ -164,12 +128,16 @@ function AppContent() {
   }
 
   // Bottom navigation handlers
+  const handleDocketView = () => {
+    setCurrentView('docket')
+  }
+
   const handleCalendarView = () => {
     setCurrentView('calendar')
   }
 
-  const handleTimerView = () => {
-    setCurrentView('timer')
+  const handleLibraryView = () => {
+    setCurrentView('library')
   }
 
   // Timer view handlers
@@ -226,10 +194,6 @@ function AppContent() {
     }
   }
 
-  // Get notches for the selected date
-  const selectedDateNotches = getNotchesByDate(selectedDate)
-  const hasNotches = selectedDateNotches.length > 0
-
   return (
     <div className="app">
       {/* Global Database Loading State */}
@@ -285,50 +249,38 @@ function AppContent() {
               {/* Fixed Header Area */}
               <div className="app-header">
                 <Header 
-                  onAddClick={handleAddNotch} 
                   onTimerClick={handleTimerClick}
                   onProfileClick={handleProfileClick}
                   disabled={!isDbReady || !!dbError} 
                 />
-                {/* Only show DayPicker in calendar view */}
-                {currentView === 'calendar' && (
-                  <DayPicker 
-                    selectedDate={selectedDate}
-                    onDateChange={handleDateChange}
-                  />
-                )}
               </div>
 
               {/* Scrollable Content Area */}
-              <div className={`app-content ${currentView === 'timer' ? 'focus-view' : ''}`}>
-                {currentView === 'calendar' ? (
+              <div className={`app-content ${currentView === 'library' ? 'focus-view' : ''}`}>
+                {currentView === 'docket' ? (
+                  // Docket View Content (new blank view)
+                  <DocketView />
+                ) : currentView === 'calendar' ? (
                   // Calendar View Content
-                  hasNotches ? (
-                    <TaskTimeline 
-                      date={selectedDate}
-                      tasks={selectedDateNotches}
-                      onNotchClick={handleNotchClick}
-                    />
-                  ) : (
-                    <EmptyDayState 
-                      date={selectedDate}
-                      onAddNotch={handleAddNotch}
-                      disabled={!isDbReady || !!dbError}
-                    />
-                  )
+                  <CalendarView
+                    selectedDate={selectedDate}
+                    onDateChange={handleDateChange}
+                    onNotchClick={handleNotchClick}
+                    onAddNotch={handleAddNotch}
+                    disabled={!isDbReady || !!dbError}
+                  />
                 ) : (
-                  // Focus View Content
-                  <FocusView onStartTimer={(notch) => handleStartTimer(notch, 'timer')} />
+                  // Library View Content (renamed from Focus View)
+                  <LibraryView onStartTimer={(notch) => handleStartTimer(notch, 'library')} />
                 )}
               </div>
 
               {/* Bottom Navigation */}
               <BottomNavigation 
                 currentView={currentView}
+                onDocketClick={handleDocketView}
                 onCalendarClick={handleCalendarView}
-                onTimerClick={handleTimerView}
-                onAddClick={handleAddNotch}
-                // onProfileClick={handleProfileClick} // Temporarily commented out - using header PFP
+                onLibraryClick={handleLibraryView}
                 disabled={!isDbReady || !!dbError}
               />
             </>
@@ -353,37 +305,6 @@ function AppContent() {
         </>
       )}
 
-      {/* Hidden timer components for future reference */}
-      {/* {selectedTimer ? (
-        <TimerDetail
-          timer={selectedTimer}
-          isRunning={runningTimers.has(selectedTimer.id)}
-          onBack={handleBackToList}
-          onDelete={handleDeleteTimer}
-          onStart={startTimer}
-          onStop={stopTimer}
-          onReset={resetTimer}
-        />
-      ) : (
-        <TimerList
-          timers={timers}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          runningTimers={runningTimers}
-          onStart={startTimer}
-          onStop={stopTimer}
-          onReset={resetTimer}
-          onTimerSelect={handleTimerSelect}
-        />
-      )} */}
-
-      {/* Hidden modal for future reference */}
-      {/* {showCreateModal && (
-        <CreateTimerModal
-          onClose={() => setShowCreateModal(false)}
-          onCreate={handleCreateTimer}
-        />
-      )} */}
     </div>
   )
 }
