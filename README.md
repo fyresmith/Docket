@@ -144,7 +144,7 @@ src/
 
 ## 🎨 Design Philosophy
 
-Notch embraces minimalist design principles focused on:
+Docket embraces minimalist design principles focused on:
 - **Clarity**: Clean, uncluttered interface
 - **Intention**: Every interaction serves a purpose  
 - **Focus**: Distraction-free work environments
@@ -202,12 +202,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Support
 
-- 📝 **Issues**: [GitHub Issues](https://github.com/yourusername/notch/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/notch/discussions)
-- 📧 **Email**: support@notch.app
+- 📝 **Issues**: [GitHub Issues](https://github.com/yourusername/docket/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/docket/discussions)
+- 📧 **Email**: support@docket.app
 
 ---
 
-**Start notching your time today. Every hour, marked with intention.**
+**Start organizing your time today. Every hour, structured with intention.**
 
 Built with ❤️ for focused productivity and intentional time management.
