@@ -259,7 +259,7 @@ function AppContent() {
               <div className={`app-content ${currentView === 'library' ? 'focus-view' : ''}`}>
                 {currentView === 'docket' ? (
                   // Docket View Content (new blank view)
-                  <DocketView />
+                  <DocketView onStartTimer={(notch) => handleStartTimer(notch, 'docket')} />
                 ) : currentView === 'calendar' ? (
                   // Calendar View Content
                   <CalendarView

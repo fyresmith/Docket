@@ -1,26 +1,705 @@
+/* Docket View Base Styles */
 .docket-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-primary);
+}
+
+
+
+/* Main Content Area */
+.docket-content {
+  flex: 1;
+  overflow-y: auto;
   padding: 1.5rem;
+}
+
+/* Empty State */
+.docket-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100%;
-}
-
-.docket-content {
+  padding: 4rem 2rem;
   text-align: center;
-  max-width: 400px;
+  height: 100%;
+  min-height: 300px;
 }
 
-.docket-content h1 {
+.docket-empty-state svg {
+  color: var(--text-quaternary);
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+
+.docket-empty-state h2 {
   color: var(--text-primary);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin: 0 0 0.75rem 0;
 }
 
-.docket-content p {
+.docket-empty-state p {
   color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.5;
+  margin: 0;
+  max-width: 400px;
+}
+
+/* Section Styles */
+.docket-section {
+  margin-bottom: 1.5rem;
+}
+
+.docket-section.completed-section {
+  opacity: 0.8;
+}
+
+.docket-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--border-tertiary);
+}
+
+.docket-section-count {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+  min-width: 20px;
+  text-align: center;
+}
+
+.docket-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Card Container for Swiping */
+.docket-card-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.docket-card-container.swipeable {
+  touch-action: pan-y; /* Allow vertical scrolling but handle horizontal swipes */
+}
+
+/* Card Movement Animations */
+.docket-card-container.moving-out {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.docket-card-container.moving-in {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.docket-card-container.moving-in.animate-in {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Enhanced Card List Animations */
+.docket-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.docket-cards.reordering {
+  transition: none;
+}
+
+.docket-cards.reordering .docket-card-container {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Card Styles */
+.docket-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 2;
+}
+
+.docket-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.docket-card:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Card Status Variants */
+.docket-card.upcoming {
+  border-left: 4px solid #3B82F6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.01) 100%);
+}
+
+.docket-card.ongoing {
+  border-left: 4px solid #10B981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.docket-card.pending {
+  border-left: 4px solid rgba(245, 158, 11, 0.25);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.06) 100%);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.15), 0 2px 8px rgba(245, 158, 11, 0.1);
+  position: relative;
+}
+
+/* Completed Cards - Muted Crossed-Out Design */
+.docket-card.completed {
+  filter: grayscale(80%) brightness(0.8) contrast(0.7);
+  background: linear-gradient(135deg, rgba(156, 163, 175, 0.08) 0%, rgba(156, 163, 175, 0.04) 100%);
+  border-left: 4px solid #9CA3AF;
+  opacity: 0.75;
+  position: relative;
+}
+
+.docket-card.completed .docket-notch-title {
+  color: #6B7280;
+  text-decoration: line-through;
+  text-decoration-color: #9CA3AF;
+}
+
+.docket-card.completed .docket-time-range,
+.docket-card.completed .docket-meta-info,
+.docket-card.completed .docket-notch-description {
+  color: #9CA3AF;
+}
+
+.docket-card.completed .docket-duration,
+.docket-card.completed .docket-category {
+  color: #D1D5DB;
+}
+
+.docket-card.completed .docket-action-btn.menu {
+  background: rgba(156, 163, 175, 0.1);
+  color: #9CA3AF;
+  border-color: #D1D5DB;
+}
+
+.docket-card.completed .docket-action-btn.menu:hover {
+  background: rgba(156, 163, 175, 0.15);
+  border-color: #9CA3AF;
+}
+
+/* Missed/Cancelled Cards - Prominent Warning Design */
+.docket-card.cancelled {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  border-left: 4px solid #DC2626;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25), 0 2px 4px rgba(239, 68, 68, 0.1);
+}
+
+.docket-card.cancelled .docket-notch-title,
+.docket-card.cancelled .docket-time-range {
+  color: white;
+}
+
+.docket-card.cancelled .docket-meta-info,
+.docket-card.cancelled .docket-notch-description {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.docket-card.cancelled .docket-duration {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.docket-card.cancelled .docket-category {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.docket-card.cancelled .docket-action-btn.menu,
+.docket-card.cancelled .docket-action-btn.do-now,
+.docket-card.cancelled .docket-action-btn.reschedule {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.docket-card.cancelled .docket-action-btn.menu:hover,
+.docket-card.cancelled .docket-action-btn.do-now:hover,
+.docket-card.cancelled .docket-action-btn.reschedule:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Enhanced Swipe Actions */
+.docket-swipe-backdrop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.docket-swipe-action {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.docket-swipe-action.revealed {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.docket-swipe-action.primary {
+  width: 120px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* Left side actions */
+.docket-swipe-action.left-1 {
+  left: 0;
+}
+
+.docket-swipe-action.left-2 {
+  left: 80px;
+}
+
+/* Right side actions */
+.docket-swipe-action.right-1 {
+  right: 80px;
+}
+
+.docket-swipe-action.right-2 {
+  right: 0;
+}
+
+/* Action type colors */
+.docket-swipe-action.complete {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.docket-swipe-action.missed {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.docket-swipe-action.timer {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.docket-swipe-action.details {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.docket-swipe-action.reschedule {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.docket-swipe-action.do-now {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+/* Swipe progress indicator */
+.docket-swipe-progress {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transition: width 0.1s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.docket-swipe-progress.left {
+  left: 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.docket-swipe-progress.right {
+  right: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.docket-swipe-action:hover {
+  filter: brightness(1.1);
+}
+
+.docket-swipe-action:active {
+  transform: scale(0.95);
+}
+
+/* Card Content Layout */
+.docket-card-content {
+  width: 100%;
+}
+
+/* Single Row Layout */
+.docket-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Left Side - Task Information */
+.docket-task-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.docket-notch-title {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.docket-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.docket-time-range {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.docket-duration {
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+
+.docket-category {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.docket-notch-description {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  margin: 0;
+  margin-top: 0.125rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Right Side - Actions */
+.docket-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.docket-dropdown-container {
+  position: relative;
+  z-index: 100;
+}
+
+/* Action Buttons - Mobile-First Ergonomical Design */
+.docket-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.docket-action-btn.menu {}
+
+.docket-action-btn:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.docket-action-btn.menu:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--border-secondary);
+  color: var(--text-primary);
+}
+
+.docket-action-btn:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
+}
+
+/* Quick Action Buttons for Different Statuses */
+.docket-action-btn.complete {
+  background: var(--bg-surface);
+  color: #10B981;
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.docket-action-btn.complete:hover {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
+}
+
+.docket-action-btn.missed {
+  background: var(--bg-surface);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.docket-action-btn.missed:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #DC2626;
+}
+
+.docket-action-btn.do-now {
+  background: var(--bg-surface);
+  color: #3B82F6;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.docket-action-btn.do-now:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #2563EB;
+}
+
+.docket-action-btn.reschedule {
+  background: var(--bg-surface);
+  color: #8B5CF6;
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.docket-action-btn.reschedule:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #7C3AED;
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  
+  .docket-content {
+    padding: 0.75rem 1rem 1.25rem 1rem;
+  }
+  
+  .docket-card {
+    padding: 0.875rem;
+  }
+  
+  .docket-card-row {
+    gap: 0.75rem;
+  }
+  
+  .docket-task-info {
+    gap: 0.1875rem;
+  }
+  
+  .docket-notch-title {
+    font-size: 0.9375rem;
+  }
+  
+  .docket-meta-info {
+    font-size: 0.75rem;
+  }
+  
+  .docket-duration {
+    font-size: 0.6875rem;
+  }
+  
+  .docket-category {
+    font-size: 0.6875rem;
+  }
+  
+  .docket-notch-description {
+    font-size: 0.75rem;
+  }
+  
+  .docket-action-btn.menu,
+  .docket-action-btn.complete,
+  .docket-action-btn.missed,
+  .docket-action-btn.do-now,
+  .docket-action-btn.reschedule {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+
+  .docket-swipe-action {
+    width: 90px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  
+  .docket-content {
+    padding: 0.5rem 0.75rem 1rem 0.75rem;
+  }
+  
+  .docket-card {
+    padding: 0.75rem;
+  }
+  
+  .docket-section-title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .docket-cards {
+    gap: 0.5rem;
+  }
+  
+  .docket-card-row {
+    gap: 0.625rem;
+  }
+  
+  .docket-task-info {
+    gap: 0.125rem;
+  }
+  
+  .docket-notch-title {
+    font-size: 0.875rem;
+  }
+  
+  .docket-meta-info {
+    font-size: 0.6875rem;
+  }
+  
+  .docket-duration {
+    font-size: 0.625rem;
+  }
+  
+  .docket-category {
+    font-size: 0.625rem;
+  }
+  
+  .docket-notch-description {
+    font-size: 0.6875rem;
+  }
+  
+  .docket-action-btn.menu,
+  .docket-action-btn.complete,
+  .docket-action-btn.missed,
+  .docket-action-btn.do-now,
+  .docket-action-btn.reschedule {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+
+  .docket-swipe-action {
+    width: 70px;
+    font-size: 0.6875rem;
+    gap: 0.125rem;
+  }
+
+  .docket-swipe-action.primary {
+    width: 100px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Custom Scrollbar */
+.docket-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.docket-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.docket-content::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+.docket-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-secondary);
+}
+
+/* Focus Styles */
+.docket-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.docket-action-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 } 

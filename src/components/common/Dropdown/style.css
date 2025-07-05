@@ -1,0 +1,131 @@
+/* Generic Dropdown Component */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-tertiary);
+  border-radius: 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  box-shadow: var(--shadow-lg);
+  z-index: 9999;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Position is now calculated dynamically in JavaScript */
+
+/* Dropdown Items */
+.dropdown-item {
+  background: var(--bg-surface);
+  border: none;
+  border-bottom: 1px solid var(--border-primary);
+  padding: 0.875rem 1rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-item:hover:not(:disabled) {
+  background: var(--bg-surface-hover);
+}
+
+.dropdown-item:active:not(:disabled) {
+  background: var(--bg-surface);
+  transition: background 0.1s ease;
+}
+
+.dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dropdown-item:first-child {
+  border-radius: 12px 12px 0 0;
+}
+
+.dropdown-item:last-child {
+  border-radius: 0 0 12px 12px;
+  border-bottom: none;
+}
+
+.dropdown-item:only-child {
+  border-radius: 12px;
+  border-bottom: none;
+}
+
+/* Item variants */
+.dropdown-item--default {
+  /* Default styling already applied */
+}
+
+.dropdown-item--success {
+  color: #10B981;
+}
+
+.dropdown-item--success:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.dropdown-item--danger {
+  color: #EF4444;
+}
+
+.dropdown-item--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  color: #DC2626;
+}
+
+.dropdown-item--primary {
+  color: var(--accent-primary);
+}
+
+.dropdown-item--primary:hover:not(:disabled) {
+  background: var(--accent-bg);
+  color: var(--accent-primary);
+}
+
+/* Animation */
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dropdown {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown {
+    min-width: 180px;
+  }
+
+  .dropdown-item {
+    padding: 1rem 1.125rem;
+    font-size: 1rem;
+  }
+} 
