@@ -146,6 +146,13 @@ function AppContent() {
     setSelectedTimerNotch(notch)
     setCurrentView('timerView')
   }
+
+  // Handle opening timer directly (for active runner)
+  const handleOpenTimer = (notch) => {
+    setPreviousView(currentView)
+    setSelectedTimerNotch(notch)
+    setCurrentView('timerView')
+  }
   
   // Handle timer click from header dropdown
   const handleTimerClick = (notchId) => {
@@ -259,7 +266,10 @@ function AppContent() {
               <div className={`app-content ${currentView === 'library' ? 'focus-view' : ''}`}>
                 {currentView === 'docket' ? (
                   // Docket View Content (new blank view)
-                  <DocketView onStartTimer={(notch) => handleStartTimer(notch, 'docket')} />
+                  <DocketView 
+                    onStartTimer={(notch) => handleStartTimer(notch, 'docket')}
+                    onOpenTimer={(notch) => handleOpenTimer(notch)}
+                  />
                 ) : currentView === 'calendar' ? (
                   // Calendar View Content
                   <CalendarView

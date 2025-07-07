@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { FiPlay, FiPause, FiClock, FiTag, FiEdit, FiPlus, FiSearch } from 'react-icons/fi'
+import { FiPlay, FiPause, FiClock, FiTag, FiEdit, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi'
 import { FaThList } from 'react-icons/fa'
 import { useNotchDB } from '../../../hooks/useNotchDB'
 import { useTimer } from '../../../contexts/TimerContext'
@@ -7,7 +7,7 @@ import NotchDetailModal from '../../common/NotchDetailModal'
 import EditNotchModal from '../../common/EditNotchModal'
 import CreateNotchModal from '../../common/CreateNotchModal'
 import AddNotchDropdown from './AddNotchDropdown'
-import SwipeableNotchCard from './SwipeableNotchCard'
+import SwipeableCard from '../../common/SwipeableCard'
 import './style.css'
 
 function LibraryView({ onStartTimer }) {
@@ -275,11 +275,21 @@ function LibraryView({ onStartTimer }) {
               const notchColor = getNotchColor(notch)
               
               return (
-                <SwipeableNotchCard
+                <SwipeableCard
                   key={notch.id}
-                  notchId={notch.id}
-                  notchTitle={notch.title}
-                  onDelete={deleteNotch}
+                  rightActions={[{
+                    id: 'delete',
+                    type: 'delete',
+                    icon: <FiTrash2 />,
+                    label: 'Delete',
+                    primary: true,
+                    onAction: async () => {
+                      const confirmDelete = window.confirm(`Are you sure you want to delete "${notch.title}"?`)
+                      if (confirmDelete) {
+                        await deleteNotch(notch.id)
+                      }
+                    }
+                  }]}
                 >
                   <div
                     className={`notch-timer-card ${isRunning ? 'running' : ''}`}
@@ -331,7 +341,7 @@ function LibraryView({ onStartTimer }) {
                       </button>
                     </div>
                   </div>
-                </SwipeableNotchCard>
+                </SwipeableCard>
               )
             })
           )}

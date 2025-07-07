@@ -1,0 +1,296 @@
+/* SwipeableCard Container */
+.swipeable-card-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+  isolation: isolate;
+  touch-action: pan-y; /* Allow vertical scrolling but handle horizontal swipes */
+}
+
+.swipeable-card-container.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Progressive background highlight */
+.swipeable-card-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--accent-color, 59, 130, 246), 0.15) 0%,
+    rgba(var(--accent-color, 59, 130, 246), 0.08) 100%
+  );
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  border-radius: inherit;
+}
+
+.swipeable-card-background.left {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 185, 129, 0.15) 0%,
+    rgba(16, 185, 129, 0.05) 100%
+  );
+}
+
+.swipeable-card-background.right {
+  background: linear-gradient(
+    270deg,
+    rgba(245, 158, 11, 0.15) 0%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
+}
+
+/* Action buttons container */
+.swipeable-card-actions {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.swipeable-card-actions.left {
+  left: 0;
+  justify-content: flex-start;
+}
+
+.swipeable-card-actions.right {
+  right: 0;
+  justify-content: flex-end;
+}
+
+/* Individual action buttons */
+.swipeable-action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.7);
+  opacity: 0;
+}
+
+.swipeable-action-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.swipeable-action-button:active {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+.swipeable-action-button.primary {
+  min-width: 80px;
+  min-height: 80px;
+  background: rgba(59, 130, 246, 0.95);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.swipeable-action-button.primary:hover {
+  background: rgba(59, 130, 246, 1);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.swipeable-action-button.will-trigger {
+  transform: scale(1.1);
+  background: rgba(16, 185, 129, 0.95);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+  animation: actionPulse 0.6s ease-in-out infinite alternate;
+}
+
+/* Action type specific colors */
+.swipeable-action-button.complete {
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.swipeable-action-button.complete:hover {
+  background: rgba(16, 185, 129, 1);
+}
+
+.swipeable-action-button.delete {
+  background: rgba(239, 68, 68, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.swipeable-action-button.delete:hover {
+  background: rgba(239, 68, 68, 1);
+}
+
+.swipeable-action-button.missed {
+  background: rgba(245, 158, 11, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.swipeable-action-button.missed:hover {
+  background: rgba(245, 158, 11, 1);
+}
+
+.swipeable-action-button.timer {
+  background: rgba(16, 185, 129, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.swipeable-action-button.timer:hover {
+  background: rgba(16, 185, 129, 1);
+}
+
+.swipeable-action-button.details {
+  background: rgba(107, 114, 128, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(107, 114, 128, 0.3);
+}
+
+.swipeable-action-button.details:hover {
+  background: rgba(107, 114, 128, 1);
+}
+
+.swipeable-action-button.reschedule {
+  background: rgba(139, 92, 246, 0.95);
+  color: white;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+}
+
+.swipeable-action-button.reschedule:hover {
+  background: rgba(139, 92, 246, 1);
+}
+
+/* Action button content */
+.action-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.swipeable-action-button.primary .action-icon {
+  font-size: 1.5rem;
+}
+
+.action-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.swipeable-action-button.primary .action-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Main card */
+.swipeable-card {
+  position: relative;
+  z-index: 3;
+  background: inherit;
+  border-radius: inherit;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.swipeable-card.will-trigger {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Animations */
+@keyframes actionPulse {
+  from {
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+  }
+  to {
+    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.6);
+  }
+}
+
+/* Performance optimizations */
+.swipeable-card-container,
+.swipeable-card,
+.swipeable-action-button {
+  contain: layout style paint;
+}
+
+/* Accessibility */
+.swipeable-action-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .swipeable-action-button {
+    min-width: 56px;
+    min-height: 56px;
+    gap: 0.125rem;
+  }
+  
+  .swipeable-action-button.primary {
+    min-width: 72px;
+    min-height: 72px;
+  }
+  
+  .action-icon {
+    font-size: 1rem;
+  }
+  
+  .swipeable-action-button.primary .action-icon {
+    font-size: 1.25rem;
+  }
+  
+  .action-label {
+    font-size: 0.6rem;
+  }
+  
+  .swipeable-action-button.primary .action-label {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .swipeable-card-actions {
+    gap: 0.375rem;
+    padding: 0.5rem;
+  }
+  
+  .swipeable-action-button {
+    min-width: 48px;
+    min-height: 48px;
+  }
+  
+  .swipeable-action-button.primary {
+    min-width: 64px;
+    min-height: 64px;
+  }
+} 
