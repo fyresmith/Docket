@@ -331,8 +331,8 @@ function DocketView({ onStartTimer, onOpenTimer }) {
 
     switch (status) {
       case 'pending':
-        // Pending tasks: Complete (left) / Missed (right)
-        leftActions.push({
+        // Pending tasks: Complete + Missed (right) - multi-option
+        rightActions.push({
           id: 'complete',
           type: 'complete',
           icon: <FiCheck />,
@@ -345,14 +345,14 @@ function DocketView({ onStartTimer, onOpenTimer }) {
           type: 'missed',
           icon: <FiX />,
           label: 'Missed',
-          primary: true,
+          primary: false,
           onAction: () => handleMarkMissed(notch.id)
         })
         break
 
       case 'upcoming':
       case 'ongoing':
-        // Active tasks: Timer (left) / Details (right)
+        // Active tasks: Timer + Complete (left) / Details + Reschedule (right)
         leftActions.push({
           id: 'timer',
           type: 'timer',
@@ -360,6 +360,14 @@ function DocketView({ onStartTimer, onOpenTimer }) {
           label: 'Timer',
           primary: true,
           onAction: () => onStartTimer && onStartTimer(notch, 'docket')
+        })
+        leftActions.push({
+          id: 'complete',
+          type: 'complete',
+          icon: <FiCheck />,
+          label: 'Complete',
+          primary: false,
+          onAction: () => handleMarkCompleted(notch.id)
         })
         rightActions.push({
           id: 'details',
@@ -369,11 +377,19 @@ function DocketView({ onStartTimer, onOpenTimer }) {
           primary: true,
           onAction: () => handleCardClick(notch)
         })
+        rightActions.push({
+          id: 'reschedule',
+          type: 'reschedule',
+          icon: <FiRefreshCw />,
+          label: 'Reschedule',
+          primary: false,
+          onAction: () => handleReschedule(notch)
+        })
         break
 
       case 'cancelled':
-        // Cancelled tasks: Do Now (left) / Reschedule (right)
-        leftActions.push({
+        // Cancelled tasks: Do Now + Reschedule (right) - multi-option
+        rightActions.push({
           id: 'do-now',
           type: 'timer',
           icon: <FiPlay />,
@@ -386,13 +402,13 @@ function DocketView({ onStartTimer, onOpenTimer }) {
           type: 'reschedule',
           icon: <FiRefreshCw />,
           label: 'Reschedule',
-          primary: true,
+          primary: false,
           onAction: () => handleReschedule(notch)
         })
         break
 
       case 'completed':
-        // Completed tasks: Only details
+        // Completed tasks: Details (right) - single option
         rightActions.push({
           id: 'details',
           type: 'details',
